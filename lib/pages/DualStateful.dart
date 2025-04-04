@@ -27,6 +27,7 @@ class DualStatefulPage extends StatefulWidget {
   State<DualStatefulPage> createState() => _DualStatefulPageState();
 }
 
+//TODO: add tax computation 5 percent
 class _DualStatefulPageState extends State<DualStatefulPage> {
   void addToCheckout(Map<String, dynamic> item) {
     setState(() {

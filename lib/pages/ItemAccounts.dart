@@ -27,6 +27,10 @@ class _ItemAccountsState extends State<ItemAccounts> {
   final Map<String, TextEditingController> _controllers5 = {};
   final Map<String, TextEditingController> _controllers6 = {};
 
+  final Map<String, TextEditingController> LCountController = {};
+  final Map<String, TextEditingController> LPoundsController = {};
+  final Map<String, TextEditingController> LOzController = {};
+
   @override
   void initState() {
     super.initState();
@@ -416,6 +420,110 @@ class TextFields extends StatefulWidget {
 }
 
 class _TextFieldsState extends State<TextFields> {
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, TextEditingController> _controllers2 = {};
+  final Map<String, TextEditingController> _controllers3 = {};
+  final Map<String, TextEditingController> _controllers4 = {};
+  final Map<String, TextEditingController> _controllers5 = {};
+  final Map<String, TextEditingController> _controllers6 = {};
+
+  final Map<String, TextEditingController> LCountController = {};
+  final Map<String, TextEditingController> LPoundsController = {};
+  final Map<String, TextEditingController> LOzController = {};
+
+  final Map<String, TextEditingController> countController = {};
+
+  List<Map<String, dynamic>> _items = [];
+  List<Map<String, dynamic>> liquorList = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isExpanded = false;
+  @override
+  void initState() {
+    super.initState();
+    _fetchItems();
+    _fetchLiquor();
+  }
+
+  @override
+  void dispose() {
+    for (var controller in [
+      ..._controllers.values,
+      ..._controllers2.values,
+      ..._controllers3.values
+    ]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _fetchLiquor() async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('Inventory')
+          .where('category', isEqualTo: 'Liquor')
+          .get();
+
+      final items = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final id = doc.id;
+
+        LCountController[id] =
+            TextEditingController(text: data['open_count']?.toString() ?? '0');
+        LOzController[id] =
+            TextEditingController(text: data['open_count']?.toString() ?? '0');
+        LPoundsController[id] =
+            TextEditingController(text: data['open_count']?.toString() ?? '0');
+
+        return {
+          'id': id,
+          'name': data['name'] ?? 'Unnamed Item',
+          'category': data['category'],
+          ...data,
+        };
+      }).toList();
+
+      setState(() {
+        liquorList = items;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching items: $e')),
+      );
+    }
+  }
+
+  Future<void> _fetchItems() async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('Inventory')
+          .where('category', isEqualTo: 'RTDs')
+          .get();
+
+      final items = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final id = doc.id;
+
+        countController[id] =
+            TextEditingController(text: data['open_count']?.toString() ?? '0');
+
+        return {
+          'id': id,
+          'name': data['name'] ?? 'Unnamed Item',
+          'category': data['category'],
+          ...data,
+        };
+      }).toList();
+
+      setState(() {
+        _items = items;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching items: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -426,7 +534,185 @@ class _TextFieldsState extends State<TextFields> {
         elevation: 0,
         title: const Text(
           "Opening Accounts",
-          style: CheersStyles.posTitleStyle, // Set text color to black
+          style: CheersStyles.posTitleStyle,
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Set the opening accounts amounts'),
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
+            ExpansionTile(
+              title: const Text('RTDs'),
+              initiallyExpanded: _isExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() => _isExpanded = expanded);
+              },
+              children: [
+                // Only display the title once when the ExpansionTile is opened
+                const SizedBox(
+                  width: 800,
+                  child: Row(
+                    children: [
+                      Text("Name"),
+                      SizedBox(
+                        width: 180,
+                      ),
+                      Text("Count"),
+                    ],
+                  ),
+                ),
+
+                // Now map over your items
+                ..._items.map((item) {
+                  final id = item['id'];
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: SizedBox(
+                      width: 800,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  item['name'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 100,
+                                child: TextField(
+                                  controller: countController[id],
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text('Liquor'),
+              initiallyExpanded: _isExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() => _isExpanded = expanded);
+              },
+              children: [
+                // Only display the title once when the ExpansionTile is opened
+                const SizedBox(
+                  width: 800,
+                  child: Row(
+                    children: [
+                      Text("Name"),
+                      SizedBox(
+                        width: 180,
+                      ),
+                      Text("Full"),
+                      SizedBox(
+                        width: 80,
+                      ),
+                      Text("Pounds"),
+                      SizedBox(
+                        width: 60,
+                      ),
+                      Text("OZ")
+                    ],
+                  ),
+                ),
+
+                // Now map over your items
+                ...liquorList.map((item) {
+                  final id = item['id'];
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: SizedBox(
+                      width: 800,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  item['name'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 100,
+                                child: TextField(
+                                  controller: LCountController[id],
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100,
+                                child: TextField(
+                                  controller: LPoundsController[id],
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100,
+                                child: TextField(
+                                  controller: LOzController[id],
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style: CheersStyles.buttonMain,
+                  onPressed: () {},
+                  child: const Text("Set"),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  style: CheersStyles.buttonMain,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Close"),
+                )
+              ],
+            ),
+          ],
         ),
       ),
     );

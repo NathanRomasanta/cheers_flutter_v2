@@ -114,6 +114,14 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     ),
                     title: const Text("Settings"),
                     body: const Settings()),
+                PaneItem(
+                    icon: const Icon(
+                      Icons.settings,
+                      color: Color(0xffFF6E1F),
+                      size: 25,
+                    ),
+                    title: const Text("Settings"),
+                    body: SquarePaymentPage()),
               ],
               selected: currentPage,
               onChanged: (index) => setState(() {
