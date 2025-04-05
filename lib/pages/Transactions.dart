@@ -63,7 +63,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 color: const Color(0xffFfffff),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(
+                    top: 30.0, right: 20, left: 20, bottom: 20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

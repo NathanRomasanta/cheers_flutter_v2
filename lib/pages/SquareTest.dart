@@ -1,109 +1,343 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SquarePaymentPage extends StatefulWidget {
+  const SquarePaymentPage({Key? key}) : super(key: key);
+
   @override
   _SquarePaymentPageState createState() => _SquarePaymentPageState();
 }
 
 class _SquarePaymentPageState extends State<SquarePaymentPage> {
-  final String squareApplicationId =
-      "sq0idp-KmV2UERfVsNgK4OXxudrsg"; // Replace with your Square App ID
-  final String locationId =
-      "LFKDEW3604575"; // Replace with your Square Location ID
-  final String squareAccessToken =
-      "EAAAl2wBan9Hwz6ZDxLvH_eC0itywIeS4393ZkRQGxp0hdM15gtl39eKMPWdey3x"; // Replace with your Square Access Token
+  final TextEditingController _totalController = TextEditingController();
+  bool _isLoading = false;
+  String _errorMessage = '';
 
-  String? lastPaymentId;
-  String paymentStatus = "Not Checked";
-
-  /// Function to open Square POS for payment
-  void openSquarePOS(int amountCents) async {
-    String paymentId = DateTime.now()
-        .millisecondsSinceEpoch
-        .toString(); // Unique ID for payment
-    setState(() {
-      lastPaymentId = paymentId;
-      paymentStatus = "Waiting for payment...";
-    });
-
-    String url = "square://payments/create?"
-        "amount_cents=$amountCents&"
-        "currency_code=USD&"
-        "client_id=$squareApplicationId&"
-        "location_id=$locationId&"
-        "idempotency_key=$paymentId"; // Unique transaction key
-
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      debugPrint("Could not open Square POS app.");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Square POS app not installed."),
-      ));
-    }
+  @override
+  void dispose() {
+    _totalController.dispose();
+    super.dispose();
   }
 
-  /// Function to check the payment status via Square API
-  Future<void> checkPaymentStatus() async {
-    if (lastPaymentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("No payment found. Please make a payment first."),
-      ));
+  void _setError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+  }
+
+  void _clearError() {
+    setState(() {
+      _errorMessage = '';
+    });
+  }
+
+  Future<void> _processPayment() async {
+    _clearError();
+
+    if (_totalController.text.isEmpty) {
+      _setError('Please enter a total amount');
       return;
     }
 
-    var url =
-        Uri.parse("https://connect.squareup.com/v2/payments/$lastPaymentId");
-
-    var response = await http.get(
-      url,
-      headers: {
-        "Authorization": "Bearer $squareAccessToken",
-        "Square-Version": "2023-12-13",
-        "Content-Type": "application/json"
-      },
-    );
-
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(response.body);
+    try {
       setState(() {
-        paymentStatus = jsonResponse['payment']['status'];
+        _isLoading = true;
       });
-    } else {
+
+      double totalAmount = double.parse(_totalController.text);
+      if (totalAmount <= 0) {
+        _setError('Please enter a valid amount greater than 0');
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Convert to cents (Square expects amount in smallest currency unit)
+      int amountInCents = (totalAmount * 100).round();
+
+      // First, create a payment in the Square API
+      final response = await _createSquarePayment(amountInCents);
+
+      if (response['success'] == true && response['checkoutUrl'] != null) {
+        // Launch the Square checkout URL
+        final Uri squareCheckoutUrl = Uri.parse(response['checkoutUrl']);
+        if (await canLaunchUrl(squareCheckoutUrl)) {
+          await launchUrl(squareCheckoutUrl,
+              mode: LaunchMode.externalApplication);
+        } else {
+          _setError(
+              'Could not launch Square checkout. Please try again later.');
+        }
+      } else {
+        _setError(
+            'Failed to create payment: ${response['error'] ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      _setError('Error: $e');
+    } finally {
       setState(() {
-        paymentStatus = "Failed to check payment. Error: ${response.body}";
+        _isLoading = false;
       });
     }
+  }
+
+  Future<Map<String, dynamic>> _createSquarePayment(int amountInCents) async {
+    try {
+      // Replace with your actual backend API endpoint that communicates with Square
+      final url =
+          Uri.parse('https://your-backend-api.com/create-square-payment');
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization':
+              'Bearer YOUR_SERVER_SIDE_API_KEY', // Your server should handle this securely
+        },
+        body: jsonEncode({
+          'amount_money': {'amount': amountInCents, 'currency': 'USD'},
+          'idempotency_key': DateTime.now().millisecondsSinceEpoch.toString(),
+          'redirect_url': 'your-app-scheme://payment-complete'
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'checkoutUrl': data['checkout']['checkout_page_url']
+        };
+      } else {
+        return {
+          'success': false,
+          'error': 'HTTP Error: ${response.statusCode} - ${response.body}'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  // This is a mock implementation for testing without a backend
+  Future<Map<String, dynamic>> _mockCreateSquarePayment(
+      int amountInCents) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // For testing: This would normally come from your backend calling Square API
+    return {
+      'success': true,
+      'checkoutUrl':
+          'https://connect.squareup.com/v2/checkout?c=CHECKOUT_ID_FROM_SQUARE_API'
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Square Payment")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () =>
-                  openSquarePOS(5000), // Example: $50.00 (5000 cents)
-              child: Text("Pay with Square POS"),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: lastPaymentId != null ? checkPaymentStatus : null,
-              child: Text("Check Payment Status"),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Payment Status: $paymentStatus",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Square Payment Test (v2 API)'),
+          backgroundColor: Colors.blue,
         ),
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Enter Payment Total',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _totalController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Total Amount',
+                  hintText: 'Enter the total payment amount',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.attach_money),
+                  errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+                ),
+                style: const TextStyle(fontSize: 18),
+                onChanged: (_) => _clearError(),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _processPayment,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Process Payment with Square',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// If you're using this as part of a larger app with MaterialApp already defined:
+class SquarePaymentWidget extends StatefulWidget {
+  const SquarePaymentWidget({Key? key}) : super(key: key);
+
+  @override
+  _SquarePaymentWidgetState createState() => _SquarePaymentWidgetState();
+}
+
+class _SquarePaymentWidgetState extends State<SquarePaymentWidget> {
+  final TextEditingController _totalController = TextEditingController();
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  @override
+  void dispose() {
+    _totalController.dispose();
+    super.dispose();
+  }
+
+  void _setError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+  }
+
+  void _clearError() {
+    setState(() {
+      _errorMessage = '';
+    });
+  }
+
+  Future<void> _processPayment() async {
+    _clearError();
+
+    if (_totalController.text.isEmpty) {
+      _setError('Please enter a total amount');
+      return;
+    }
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      double totalAmount = double.parse(_totalController.text);
+      if (totalAmount <= 0) {
+        _setError('Please enter a valid amount greater than 0');
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Convert to cents
+      int amountInCents = (totalAmount * 100).round();
+
+      // For a real implementation, you would call your backend API here
+      // This is just a mock for testing
+      final response = await _mockCreateSquarePayment(amountInCents);
+
+      if (response['success'] == true && response['checkoutUrl'] != null) {
+        final Uri squareCheckoutUrl = Uri.parse(response['checkoutUrl']);
+        if (await canLaunchUrl(squareCheckoutUrl)) {
+          await launchUrl(squareCheckoutUrl,
+              mode: LaunchMode.externalApplication);
+        } else {
+          _setError(
+              'Could not launch Square checkout. Please try again later.');
+        }
+      } else {
+        _setError(
+            'Failed to create payment: ${response['error'] ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      _setError('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Mock implementation for testing
+  Future<Map<String, dynamic>> _mockCreateSquarePayment(
+      int amountInCents) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'success': true,
+      'checkoutUrl':
+          'https://connect.squareup.com/v2/checkout?c=CHECKOUT_ID_FROM_SQUARE_API'
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Enter Payment Total',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 30),
+          TextField(
+            controller: _totalController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: 'Total Amount',
+              hintText: 'Enter the total payment amount',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.attach_money),
+              errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+            ),
+            style: const TextStyle(fontSize: 18),
+            onChanged: (_) => _clearError(),
+          ),
+          const SizedBox(height: 40),
+          SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _processPayment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'Process Payment with Square',
+                      style: TextStyle(fontSize: 18),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

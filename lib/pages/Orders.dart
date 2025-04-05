@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class StockOrder extends StatefulWidget {
   const StockOrder({super.key});
@@ -125,9 +124,6 @@ class _StockOrderState extends State<StockOrder> {
           selectedIngredients.clear();
         });
       } catch (error) {
-        Fluttertoast.showToast(
-            msg: error.toString(), gravity: ToastGravity.TOP);
-
         AlertDialog(
           title: const Text('Order Error'),
           content: const Text('Order not submitted'),

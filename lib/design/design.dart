@@ -38,7 +38,7 @@ class CheersStyles {
       minimumSize: WidgetStateProperty.all(const Size(200, 40)),
       foregroundColor: WidgetStateProperty.all(Colors.white), // Text color
       padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 32, vertical: 16)),
+          const EdgeInsets.symmetric(horizontal: 32, vertical: 20)),
       backgroundColor: WidgetStateProperty.all(const Color(0xffFF6E1F)),
       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(

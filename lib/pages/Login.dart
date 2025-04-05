@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,8 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
           password: passwordController.text.trim());
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(
-          msg: e.message.toString(), gravity: ToastGravity.TOP);
       Navigator.of(context).pop();
     }
     //navigatorKey.currentState!.popUntil((route) => route.isFirst);

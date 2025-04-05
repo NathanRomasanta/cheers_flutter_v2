@@ -5,7 +5,7 @@ import 'package:cheers_flutter/pages/Payment.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:intl/intl.dart';
 
 class POSPage extends StatefulWidget {
@@ -238,8 +238,7 @@ class _POSPageState extends State<POSPage> {
 
     if (isStockSufficient) {
       await batch.commit();
-      Fluttertoast.showToast(
-          msg: 'Transaction Done', gravity: ToastGravity.TOP);
+
       _addToTransactions();
     } else {
       showDialog(
@@ -334,8 +333,7 @@ class _POSPageState extends State<POSPage> {
         'items': checkout,
         'totalItems': totalItems
       });
-      Fluttertoast.showToast(
-          msg: 'Transaction Done', gravity: ToastGravity.TOP);
+
       setState(() {
         checkout.clear();
         totalItems = 0;
@@ -347,8 +345,6 @@ class _POSPageState extends State<POSPage> {
         );
       });
     } catch (error) {
-      Fluttertoast.showToast(msg: error.toString(), gravity: ToastGravity.TOP);
-
       showDialog(
         context: context,
         builder: (context) {

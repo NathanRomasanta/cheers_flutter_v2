@@ -2,7 +2,6 @@
 import 'package:cheers_flutter/design/design.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class POSItemCreationScreen extends StatefulWidget {
   const POSItemCreationScreen({super.key});
@@ -72,12 +71,7 @@ class _POSItemCreationScreenState extends State<POSItemCreationScreen> {
           'price': int.parse(price),
           'ingredients': selectedIngredients,
         });
-        Fluttertoast.showToast(
-            msg: 'POS Item Created', gravity: ToastGravity.TOP);
-      } catch (error) {
-        Fluttertoast.showToast(
-            msg: error.toString(), gravity: ToastGravity.TOP);
-      }
+      } catch (error) {}
     } else if (selectedOption == "Wines") {
       try {
         await _firestore
@@ -89,12 +83,7 @@ class _POSItemCreationScreenState extends State<POSItemCreationScreen> {
           'price': int.parse(price),
           'ingredients': selectedIngredients,
         });
-        Fluttertoast.showToast(
-            msg: 'POS Item Created', gravity: ToastGravity.TOP);
-      } catch (error) {
-        Fluttertoast.showToast(
-            msg: error.toString(), gravity: ToastGravity.TOP);
-      }
+      } catch (error) {}
     } else if (selectedOption == "Beers") {
       try {
         await _firestore
@@ -106,12 +95,7 @@ class _POSItemCreationScreenState extends State<POSItemCreationScreen> {
           'price': int.parse(price),
           'ingredients': selectedIngredients,
         });
-        Fluttertoast.showToast(
-            msg: 'POS Item Created', gravity: ToastGravity.TOP);
-      } catch (error) {
-        Fluttertoast.showToast(
-            msg: error.toString(), gravity: ToastGravity.TOP);
-      }
+      } catch (error) {}
     } else if (selectedOption == "Food") {
       try {
         await _firestore
@@ -150,10 +134,7 @@ class _POSItemCreationScreenState extends State<POSItemCreationScreen> {
           name = '';
           price = '';
         });
-      } catch (error) {
-        Fluttertoast.showToast(
-            msg: error.toString(), gravity: ToastGravity.TOP);
-      }
+      } catch (error) {}
     }
   }
 

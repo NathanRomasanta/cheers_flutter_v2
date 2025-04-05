@@ -1,7 +1,6 @@
 import 'package:cheers_flutter/services/FirestoreService.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class InventoryOrders extends StatefulWidget {
@@ -95,12 +94,8 @@ class _InventoryOrdersState extends State<InventoryOrders> {
         'items': orderList,
       });
 
-      Fluttertoast.showToast(msg: "Order fulfilled successfully!");
-
       await firestore.collection('Orders').doc(orderDocID).delete();
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Failed to fulfill order: $e");
-    }
+    } catch (e) {}
   }
 
   @override

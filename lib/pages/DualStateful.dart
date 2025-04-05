@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 late List<dynamic> itemsFuture;
@@ -615,8 +614,7 @@ class _RightSideWidgetState extends State<RightSideWidget> {
 
     if (isStockSufficient) {
       await batch.commit();
-      Fluttertoast.showToast(
-          msg: 'Transaction Done', gravity: ToastGravity.TOP);
+
       addToTransactions();
     } else {
       showDialog(
@@ -723,8 +721,6 @@ class _RightSideWidgetState extends State<RightSideWidget> {
         await datesDocRef.update({'transactionCount': FieldValue.increment(1)});
       }
 
-      Fluttertoast.showToast(
-          msg: 'Transaction Done', gravity: ToastGravity.TOP);
       setState(() {
         checkout.clear();
         totalItems = 0;
@@ -754,8 +750,6 @@ class _RightSideWidgetState extends State<RightSideWidget> {
         );
       });
     } catch (error) {
-      Fluttertoast.showToast(msg: error.toString(), gravity: ToastGravity.TOP);
-
       showDialog(
         context: context,
         builder: (context) {
@@ -954,7 +948,7 @@ class _RightSideWidgetState extends State<RightSideWidget> {
               height: 20,
             ),
             SizedBox(
-              height: 50,
+              height: 65,
               width: screenWidth < 600
                   ? 300
                   : 1000, // Adjust button width for smaller screens
