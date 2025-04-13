@@ -73,7 +73,7 @@ class _StocksPageState extends State<StocksPage> {
                         "Item Name/ID",
                         style: CheersStyles.tableHeaders,
                       ),
-                      SizedBox(width: 190),
+                      SizedBox(width: 315),
                       Text(
                         "Stock Count",
                         style: CheersStyles.tableHeaders,
@@ -153,7 +153,7 @@ class _StocksPageState extends State<StocksPage> {
                                       child: Row(
                                         children: [
                                           SizedBox(
-                                            width: 100,
+                                            width: 220,
                                             child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,

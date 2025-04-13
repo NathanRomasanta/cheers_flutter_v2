@@ -4,14 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class OpeningAccounts extends StatefulWidget {
-  const OpeningAccounts({super.key});
+class ClosingAccounts extends StatefulWidget {
+  const ClosingAccounts({super.key});
 
   @override
-  State<OpeningAccounts> createState() => _OpeningAccountsState();
+  State<ClosingAccounts> createState() => _ClosingAccountsState();
 }
 
-class _OpeningAccountsState extends State<OpeningAccounts> {
+class _ClosingAccountsState extends State<ClosingAccounts> {
   final Map<String, TextEditingController> LCountController = {};
   final Map<String, TextEditingController> LPoundsController = {};
   final Map<String, TextEditingController> LOzController = {};
@@ -32,10 +32,8 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
   final user = FirebaseAuth.instance.currentUser!;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Format it as 'yyyy-dd-MM'
-  // String formattedDate = DateFormat('yyyy-dd-MM')
-  //.format(DateTime.now().subtract(Duration(days: 1)));
-  String formattedDate = DateFormat('yyyy-dd-MM').format(DateTime.now());
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
   bool _isExpanded = false;
   @override
   void initState() {
@@ -187,13 +185,11 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
     }
   }
 
-  Future<void> _setOpeningAccounts() async {
+  Future<void> _setClosingAccounts() async {
     try {
       for (var wineItems in wineList) {
-        String id = wineItems['id'];
+        final id = wineItems['id'];
         final name = wineItems['name'];
-        final bottleSize = wineItems['ouncesPerBottle'];
-        final ouncesPerBottle = wineItems['ouncesPerBottle'];
         await _firestore
             .collection('Cashout')
             .doc(user.email)
@@ -202,38 +198,19 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
             .collection("Stock")
             .doc(id)
             .set({
-          'ID': id,
+          'itemID': id,
           'name': name,
-          'open_count': int.tryParse(WCountController[id]!.text) ?? 0,
-          'open_lbs': double.tryParse(WPoundsController[id]!.text) ?? 0.0,
-          'open_oz': double.tryParse(WOzController[id]!.text) ?? 0.0,
-          'close_count': 0.0,
-          'close_lbs': 0.0,
-          'close_oz': 0.0,
+          'close_count': int.tryParse(WCountController[id]!.text) ?? 0,
+          'close_lbs': double.tryParse(WPoundsController[id]!.text) ?? 0.0,
+          'close_oz': double.tryParse(WOzController[id]!.text) ?? 0.0,
           'updatedBy': user.email,
-          'bottle_size': bottleSize,
-          'price': 0,
           'timestamp': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-
-        await _firestore
-            .collection("Accounts")
-            .doc(user.email)
-            .collection("stock")
-            .doc(id)
-            .set({
-          'id': id,
-          'isLiquor': true,
-          'name': name,
-          'ouncesPerBottle': ouncesPerBottle,
-          'runningCount': int.tryParse(WCountController[id]!.text) ?? 0,
-        });
       }
 
       for (var liquorItems in liquorList) {
-        String id = liquorItems['id'];
+        final id = liquorItems['id'];
         final name = liquorItems['name'];
-        final ouncesPerBottle = liquorItems['ouncesPerBottle'];
         await _firestore
             .collection('Cashout')
             .doc(user.email)
@@ -242,129 +219,53 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
             .collection("Stock")
             .doc(id)
             .set({
-          'ID': id,
+          'itemID': id,
           'name': name,
-          'open_count': int.tryParse(LCountController[id]!.text) ?? 0,
-          'open_lbs': double.tryParse(LPoundsController[id]!.text) ?? 0.0,
-          'open_oz': double.tryParse(LOzController[id]!.text) ?? 0.0,
-          'close_count': 0.0,
-          'close_lbs': 0.0,
-          'close_oz': 0.0,
-          'bottle_size': ouncesPerBottle,
-          'price': 0,
+          'close_count': int.tryParse(LCountController[id]!.text) ?? 0,
+          'close_lbs': double.tryParse(LPoundsController[id]!.text) ?? 0.0,
+          'close_oz': double.tryParse(LOzController[id]!.text) ?? 0.0,
+          'updatedBy': user.email,
+          'timestamp': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-
-        await _firestore
-            .collection("Accounts")
-            .doc(user.email)
-            .collection("stock")
-            .doc(id)
-            .set({
-          'id': id,
-          'isLiquor': true,
-          'name': name,
-          'ouncesPerBottle': ouncesPerBottle,
-          'runningCount': int.tryParse(LCountController[id]!.text) ?? 0,
-        });
       }
 
       for (var RTDItems in _items) {
         final id = RTDItems['id'];
         final name = RTDItems['name'];
-        final bottleSize = RTDItems['ouncesPerBottle'];
         await _firestore
             .collection('Cashout')
             .doc(user.email)
             .collection("Date")
             .doc(formattedDate)
-            .collection("RTD")
+            .collection("Stock")
             .doc(id)
             .set({
-          'ID': id,
+          'itemID': id,
           'name': name,
-          'open_count': int.tryParse(countController[id]!.text) ?? 0,
-          'close_count': 0.0,
+          'close_count': int.tryParse(countController[id]!.text) ?? 0,
           'updatedBy': user.email,
-          'bottle_size': bottleSize,
-          'price': 0,
           'timestamp': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-
-        await _firestore
-            .collection("Accounts")
-            .doc(user.email)
-            .collection("stock")
-            .doc(id)
-            .set({
-          'id': id,
-          'isLiquor': false,
-          'ouncesPerBottle': 1,
-          'name': name,
-          'runningCount': int.tryParse(countController[id]!.text) ?? 0,
-        });
       }
 
       for (var beverageItems in beverageList) {
         final id = beverageItems['id'];
         final name = beverageItems['name'];
-        final bottleSize = beverageItems['ouncesPerBottle'];
         await _firestore
             .collection('Cashout')
             .doc(user.email)
             .collection("Date")
             .doc(formattedDate)
-            .collection("RTD")
+            .collection("Stock")
             .doc(id)
             .set({
-          'ID': id,
+          'itemID': id,
           'name': name,
-          'open_count': int.tryParse(BcountController[id]!.text) ?? 0,
-          'close_count': 0.0,
+          'close_count': int.tryParse(BcountController[id]!.text) ?? 0,
           'updatedBy': user.email,
-          'bottle_size': bottleSize,
-          'price': 0,
           'timestamp': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-
-        await _firestore
-            .collection("Accounts")
-            .doc(user.email)
-            .collection("stock")
-            .doc(id)
-            .set({
-          'id': id,
-          'isLiquor': false,
-          'ouncesPerBottle': 1,
-          'name': name,
-          'runningCount': int.tryParse(BcountController[id]!.text) ?? 0,
-        });
       }
-
-      await _firestore
-          .collection('Cashout')
-          .doc(user.email)
-          .collection("Date")
-          .doc(formattedDate)
-          .set({
-        'dummy': "dummy",
-      }, SetOptions(merge: true));
-
-      await _firestore
-          .collection('Cashout')
-          .doc(user.email)
-          .collection("Date")
-          .doc(formattedDate)
-          .set({
-        'dummy': FieldValue.delete(),
-      }, SetOptions(merge: true));
-
-      await _firestore.collection('Cashout').doc(user.email).set({
-        'dummy': "dummy",
-      }, SetOptions(merge: true));
-
-      await _firestore.collection('Cashout').doc(user.email).set({
-        'dummy': FieldValue.delete(),
-      }, SetOptions(merge: true));
 
       LCountController.forEach((key, controller) => controller.clear());
       LPoundsController.forEach((key, controller) => controller.clear());
@@ -406,7 +307,7 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
         iconTheme: const IconThemeData(color: Colors.black),
         elevation: 0,
         title: const Text(
-          "Opening Accounts",
+          "Closing Accounts",
           style: CheersStyles.posTitleStyle,
         ),
       ),
@@ -417,7 +318,7 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Set the opening accounts amounts'),
+              const Text('Set the closing accounts amounts'),
               const SizedBox(height: 10),
               const SizedBox(height: 10),
 
@@ -725,7 +626,7 @@ class _OpeningAccountsState extends State<OpeningAccounts> {
                   ElevatedButton(
                     style: CheersStyles.buttonMain,
                     onPressed: () {
-                      _setOpeningAccounts();
+                      _setClosingAccounts();
                     },
                     child: const Text(
                       "Set",

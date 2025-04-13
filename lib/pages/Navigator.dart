@@ -1,10 +1,12 @@
 import 'package:cheers_flutter/pages/DualStateful.dart';
-import 'package:cheers_flutter/pages/ItemAccounts.dart';
+import 'package:cheers_flutter/pages/Opening&Closing.dart';
+import 'package:cheers_flutter/pages/OrderList.dart';
+import 'package:cheers_flutter/pages/OrderStock.dart';
 import 'package:cheers_flutter/pages/Settings.dart';
 import 'package:cheers_flutter/pages/Orders.dart';
 import 'package:cheers_flutter/pages/SquareLanding.dart';
 import 'package:cheers_flutter/pages/SquareTest.dart';
-import 'package:cheers_flutter/pages/Stocks.dart';
+import 'package:cheers_flutter/pages/BaristaStock.dart';
 import 'package:cheers_flutter/pages/Transactions.dart';
 import 'package:cheers_flutter/pages/squaretest2.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -69,10 +71,9 @@ class _NavigatorGateState extends State<NavigatorGate> {
               size: const NavigationPaneSize(openMaxWidth: 86),
               items: [
                 PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
                         Icons.point_of_sale,
                         color: Color(0xffFF6E1F),
                         size: 35,
@@ -81,10 +82,9 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     title: const Text("Order"),
                     body: const DualStatefulPage()),
                 PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
                         Icons.corporate_fare_rounded,
                         color: Color(0xffFF6E1F),
                         size: 35,
@@ -93,7 +93,7 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     title: const Text("Transactions"),
                     body: const TransactionScreen()),
                 PaneItem(
-                    icon: Padding(
+                    icon: const Padding(
                       padding:
                           const EdgeInsets.all(8.0), // Add padding to the icon
                       child: const Icon(
@@ -105,22 +105,31 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     title: const Text("Stock"),
                     body: const StocksPage()),
                 PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
                         Icons.send,
                         color: Color(0xffFF6E1F),
                         size: 35,
                       ),
                     ),
                     title: const Text("Orders"),
-                    body: const StockOrder()),
+                    body: const OrderStock()),
                 PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
+                        Icons.list_alt,
+                        color: Color(0xffFF6E1F),
+                        size: 35,
+                      ),
+                    ),
+                    title: const Text("OrdersList"),
+                    body: const OrderList()),
+                PaneItem(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
                         Icons.sip,
                         color: Color(0xffFF6E1F),
                         size: 35,
@@ -129,10 +138,9 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     title: const Text("Item Accounts"),
                     body: const ItemAccounts()),
                 PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
+                    icon: const Padding(
+                      padding: EdgeInsets.all(8.0), // Add padding to the icon
+                      child: Icon(
                         Icons.settings,
                         color: Color(0xffFF6E1F),
                         size: 35,
@@ -140,30 +148,6 @@ class _NavigatorGateState extends State<NavigatorGate> {
                     ),
                     title: const Text("Settings"),
                     body: const Settings()),
-                PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
-                        Icons.settings,
-                        color: Color(0xffFF6E1F),
-                        size: 35,
-                      ),
-                    ),
-                    title: const Text("Settings"),
-                    body: const SquarePaymentPage()),
-                PaneItem(
-                    icon: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0), // Add padding to the icon
-                      child: const Icon(
-                        Icons.settings,
-                        color: Color(0xffFF6E1F),
-                        size: 25,
-                      ),
-                    ),
-                    title: const Text("Settings"),
-                    body: const SquareLanding()),
               ],
               selected: currentPage,
               onChanged: (index) => setState(() {

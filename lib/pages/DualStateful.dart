@@ -202,7 +202,7 @@ class _LeftSideWidgetState extends State<LeftSideWidget> {
                 'id': doc.id,
                 'name': doc['name'],
                 'price': doc['price'],
-                'ingredients': doc['ingredients'],
+                'items': doc['ingredients'],
               })
           .toList();
     });
@@ -641,27 +641,26 @@ class _RightSideWidgetState extends State<RightSideWidget> {
     DateTime now = DateTime.now();
     String currentDateString = "";
 
-    // Define the opening and closing times for the day (9 AM to 4 AM)
+// Define the opening and closing times for the day (9 AM to 4 AM)
     DateTime startOfDay =
         DateTime(now.year, now.month, now.day, 9); // 9 AM today
     DateTime endOfDay =
         startOfDay.add(const Duration(hours: 19)); // 4 AM the next day
 
-    // If the current time is after 9 AM but before 4 AM, use the current day
-    // If the current time is between 4 AM and 9 AM, use the previous day
+    DateTime selectedDate;
+
+// Determine if we should use today or yesterday
     if (now.isAfter(startOfDay) && now.isBefore(endOfDay)) {
-      currentDateString =
-          DateFormat('MMMM-dd-yyyy').format(startOfDay); // Today's date
-    } else if (now.isAfter(endOfDay) || now.isBefore(startOfDay)) {
-      currentDateString = DateFormat('MMMM-dd-yyyy').format(
-          startOfDay.subtract(const Duration(days: 1))); // Previous day's date
+      selectedDate = startOfDay; // Today
+    } else {
+      selectedDate =
+          startOfDay.subtract(const Duration(days: 1)); // Previous day
     }
 
-    // Get base date part (without yyyy)
-    String baseDatePart = DateFormat('MMMM-dd').format(
-        now.isAfter(startOfDay) && now.isBefore(endOfDay)
-            ? startOfDay
-            : startOfDay.subtract(const Duration(days: 1)));
+    currentDateString = DateFormat('yyyy-dd-MM').format(selectedDate);
+
+// Get base date part (without year)
+    String baseDatePart = DateFormat('dd-MM').format(selectedDate);
 
     // Reference to the transactions collection using the date
     CollectionReference transactionsCollection = db
